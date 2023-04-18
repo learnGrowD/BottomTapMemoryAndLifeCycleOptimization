@@ -21,7 +21,8 @@ class MainTapBarViewController : UITabBarController {
     
     
     var isSelectConrifm = true
-    var translatePageLastIndex = -1
+    
+    var mViewControllers : [String : UIViewController] = [:]
     
     
     override init(nibName nibNameOrNil: String?, bundle nibBundleOrNil: Bundle?) {
@@ -92,9 +93,43 @@ class MainTapBarViewController : UITabBarController {
     func attribute() {
         self.delegate = self
     }
+    
+    
 }
 
 extension MainTapBarViewController : UITabBarControllerDelegate {
+    
+    /*
+     ViewController 생성
+     */
+    func createViewController(_ index : Int) -> UIViewController {
+        switch index {
+        case MainTapBarViewController.KOTLIN:
+            if mViewControllers["KOTLIN"] == nil {
+                let vc = KotlinViewController()
+                vc.tabBarItem = UITabBarItem(title: "Kotlin", image: UIImage(systemName: ""), selectedImage: nil)
+                mViewControllers["KOTLIN"] = UINavigationController(rootViewController: vc)
+            }
+            return mViewControllers["KOTLIN"] ?? UIViewController()
+        case MainTapBarViewController.SWIFT:
+            if mViewControllers["SWIFT"] == nil {
+                let vc = SwiftViewController()
+                vc.tabBarItem = UITabBarItem(title: "Swift", image: UIImage(systemName: ""), selectedImage: nil)
+                mViewControllers["SWIFT"] = UINavigationController(rootViewController: vc)
+            }
+            return mViewControllers["SWIFT"] ?? UIViewController()
+        case MainTapBarViewController.CSHARP:
+            if mViewControllers["CSHARP"] == nil {
+                let vc = CSharpViewController()
+                vc.tabBarItem = UITabBarItem(title: "CSharp", image: UIImage(systemName: ""), selectedImage: nil)
+                mViewControllers["CSHARP"] = UINavigationController(rootViewController: vc)
+            }
+            return mViewControllers["CSHARP"] ?? UIViewController()
+        default:
+            return UIViewController()
+        }
+    }
+    
     
     /*
      Page 전환 로직이 담겨 있는 함수
