@@ -69,6 +69,8 @@ class MainTapBarViewController : UITabBarController {
              */
             self.selectedIndex = MainTapBarViewController.SWIFT
             isSelectConrifm.toggle()
+            
+            self.translatePageLastIndex = MainTapBarViewController.SWIFT
         }
         
     }
