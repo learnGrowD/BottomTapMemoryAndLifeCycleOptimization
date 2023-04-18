@@ -15,15 +15,14 @@ import PanModal
 class MainTapBarViewController : UITabBarController {
     static let KOTLIN = 0
     static let SWIFT  = 1
-    static let JAVA   = 2
-    static let META   = 3
+    static let META   = 2
+    static let JAVA   = 3
     static let CSHARP = 4
     
     
     var isSelectConrifm = true
     
     var mViewControllers : [String : UIViewController] = [:]
-    
     
     override init(nibName nibNameOrNil: String?, bundle nibBundleOrNil: Bundle?) {
         super.init(nibName: nibNameOrNil, bundle: nibBundleOrNil)
@@ -44,16 +43,12 @@ class MainTapBarViewController : UITabBarController {
     func bind() {
         
         let emptyVc = UIViewController()
-        
-        let kotlinVc = KotlinViewController()
-        let swiftVc = SwiftViewController()
-        let cSharpVc = CSharpViewController()
         viewControllers = [
-            generateNavController(kotlinVc, "Kotil", UIImage(systemName: "circle.square")),
-            generateNavController(swiftVc, "Swift", UIImage(systemName: "flag.2.crossed.circle.fill")),
+            generateNavController(emptyVc, "Kotil", UIImage(systemName: "circle.square")),
+            generateNavController(emptyVc, "Swift", UIImage(systemName: "flag.2.crossed.circle.fill")),
             generateNavController(emptyVc, "Meta", UIImage(systemName: "person.fill")),
             generateNavController(emptyVc, "Java", UIImage(systemName: "train.side.front.car")),
-            generateNavController(cSharpVc, "CSharp", UIImage(systemName: "lock.display")),
+            generateNavController(emptyVc, "CSharp", UIImage(systemName: "lock.display")),
         ]
     }
     
@@ -69,6 +64,8 @@ class MainTapBarViewController : UITabBarController {
              초기 화면 SWIFT 설정
              */
             self.selectedIndex = MainTapBarViewController.SWIFT
+            
+            self.viewControllers?[MainTapBarViewController.SWIFT] = createViewController(MainTapBarViewController.SWIFT)
             isSelectConrifm.toggle()
         }
         
@@ -107,21 +104,24 @@ extension MainTapBarViewController : UITabBarControllerDelegate {
         case MainTapBarViewController.KOTLIN:
             if mViewControllers["KOTLIN"] == nil {
                 let vc = KotlinViewController()
-                vc.tabBarItem = UITabBarItem(title: "Kotlin", image: UIImage(systemName: ""), selectedImage: nil)
+                vc.view.backgroundColor = .white
+                vc.tabBarItem = UITabBarItem(title: "Kotlin", image: UIImage(systemName: "circle.square"), selectedImage: nil)
                 mViewControllers["KOTLIN"] = UINavigationController(rootViewController: vc)
             }
             return mViewControllers["KOTLIN"] ?? UIViewController()
         case MainTapBarViewController.SWIFT:
             if mViewControllers["SWIFT"] == nil {
                 let vc = SwiftViewController()
-                vc.tabBarItem = UITabBarItem(title: "Swift", image: UIImage(systemName: ""), selectedImage: nil)
+                vc.view.backgroundColor = .white
+                vc.tabBarItem = UITabBarItem(title: "Swift", image: UIImage(systemName: "flag.2.crossed.circle.fill"), selectedImage: nil)
                 mViewControllers["SWIFT"] = UINavigationController(rootViewController: vc)
             }
             return mViewControllers["SWIFT"] ?? UIViewController()
         case MainTapBarViewController.CSHARP:
             if mViewControllers["CSHARP"] == nil {
                 let vc = CSharpViewController()
-                vc.tabBarItem = UITabBarItem(title: "CSharp", image: UIImage(systemName: ""), selectedImage: nil)
+                vc.view.backgroundColor = .white
+                vc.tabBarItem = UITabBarItem(title: "CSharp", image: UIImage(systemName: "lock.display"), selectedImage: nil)
                 mViewControllers["CSHARP"] = UINavigationController(rootViewController: vc)
             }
             return mViewControllers["CSHARP"] ?? UIViewController()
@@ -144,8 +144,6 @@ extension MainTapBarViewController : UITabBarControllerDelegate {
          */
         switch selectIndex {
         case MainTapBarViewController.META:
-            self.selectedIndex = translatePageLastIndex
-            
             let metaVc = MetaViewController()
             metaVc.view.backgroundColor = .white
             
@@ -156,20 +154,43 @@ extension MainTapBarViewController : UITabBarControllerDelegate {
             self.present(navVc, animated: true)
              
         case MainTapBarViewController.JAVA:
-            self.selectedIndex = translatePageLastIndex
-
             let javaVc = JavaViewController()
             javaVc.view.backgroundColor = .white
             
             self.presentPanModal(javaVc)
         default:
-            self.translatePageLastIndex = selectIndex
+            break
+        }
+    }
+    
+    
+    
+    /*
+     Button Tap 관련 함수
+     */
+    func tabBarController(_ tabBarController: UITabBarController, shouldSelect viewController: UIViewController) -> Bool {
+        /*
+         META와 JAVA는 화면 전환을 막고 나머지는 화면전환을 해준다.
+         또한 META와 JAVA에서는 화면 전환을 막기 전 전환 처리를 해줬다.
+         */
+        let index = tabBarController.viewControllers?.firstIndex(of: viewController)
+        switch index {
+        case MainTapBarViewController.META, MainTapBarViewController.JAVA:
+            self.translatePage(index ?? 0)
+            return false
+        default:
+            return true
         }
     }
     
     func tabBarController(_ tabBarController: UITabBarController, didSelect viewController: UIViewController) {
         
-        translatePage(self.selectedIndex)
-        
+        /*
+         Kotlin, SWIFT, CSHARP는 버튼탭을 할때 emptyViewController에서 각각의 ViewController로 바꿔준다
+         즉 Create함수에서 보다 싶이 특정 버튼을 탭했을때 생성한다.
+         */
+        if selectedIndex == MainTapBarViewController.KOTLIN || selectedIndex == MainTapBarViewController.SWIFT || selectedIndex == MainTapBarViewController.CSHARP {
+            viewControllers?[selectedIndex] = createViewController(selectedIndex)
+        }
     }
 }
